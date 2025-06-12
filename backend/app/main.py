@@ -7,8 +7,9 @@ from sqlalchemy import select, text, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .api.v1 import router_api_v1
-from .db.session import engine, get_session
+from .db.session import engine
 from .models import Url
+from .api.deps import get_session
 
 
 @asynccontextmanager
@@ -44,6 +45,5 @@ async def redirect(slug: str, session: AsyncSession = Depends(get_session)):
     await session.execute(
         update(Url).where(Url.slug == slug).values(clicks=Url.clicks + 1)
     )
-    await session.commit()
 
     return RedirectResponse(url_obj.original_url)

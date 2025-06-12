@@ -6,13 +6,28 @@ from sqlalchemy.exc import IntegrityError
 from jose import JWTError, jwt
 
 from ...schemas import TokenRead, UserCreate
-from ...db.session import get_session
+from ...api.deps import get_session
 from ...services import create_user, get_user_by_email
-from ...services.jwt import create_access_token, create_refresh_token
-from ...services.password import verify_password, hash_password
+from ...core.security import (
+    create_access_token,
+    create_refresh_token,
+    verify_password,
+    hash_password,
+)
 from ...core.config import settings
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+def set_refresh_cookie(response: Response, refresh_token: str):
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        httponly=True,
+        samesite="strict",
+        secure=False,
+        path="/auth/refresh",
+        max_age=settings.JWT_REFRESH_EXP_DAYS * 24 * 60 * 60
+    )
 
 @router.post("/register", response_model=TokenRead, status_code=status.HTTP_201_CREATED)
 async def register_user(data: UserCreate, response: Response, session: AsyncSession = Depends(get_session)):
@@ -28,15 +43,7 @@ async def register_user(data: UserCreate, response: Response, session: AsyncSess
     access_token = create_access_token({"sub": str(user.id)})
     refresh_token = create_refresh_token({"sub": str(user.id)})
 
-    response.set_cookie(
-        key="refresh_token",
-        value=refresh_token,
-        httponly=True,
-        samesite="strict",
-        secure=False,
-        path="/auth/refresh",
-        max_age=settings.JWT_REFRESH_EXP_DAYS * 24 * 60 * 60
-    )
+    set_refresh_cookie(response, refresh_token)
 
     return {"access_token": access_token, "token_type": "bearer"}
 
@@ -54,21 +61,13 @@ async def login_user(
     access_token = create_access_token({"sub": str(user.id)})
     refresh_token = create_refresh_token({"sub": str(user.id)})
 
-    response.set_cookie(
-        key="refresh_token",
-        value=refresh_token,
-        httponly=True,
-        samesite="strict",
-        secure=False,
-        path="/auth/refresh",
-        max_age=settings.JWT_REFRESH_EXP_DAYS * 24 * 60 * 60
-    )
+    set_refresh_cookie(response, refresh_token)
 
     return {"access_token": access_token, "token_type": "bearer"}
 
 
 @router.post("/refresh", response_model=TokenRead)
-async def refresh_token(request: Request, response: Response, session: AsyncSession = Depends(get_session)):
+async def refresh_token(request: Request, response: Response):
     token_cookie = request.cookies.get("refresh_token")
 
     if not token_cookie:
@@ -88,14 +87,6 @@ async def refresh_token(request: Request, response: Response, session: AsyncSess
     access_token = create_access_token({"sub": str(user_id)})
     refresh_token = create_refresh_token({"sub": str(user_id)})
 
-    response.set_cookie(
-        key="refresh_token",
-        value=refresh_token,
-        httponly=True,
-        samesite="strict",
-        secure=False,
-        path="/auth/refresh",
-        max_age=settings.JWT_REFRESH_EXP_DAYS * 24 * 60 * 60
-    )
+    set_refresh_cookie(response, refresh_token)
 
     return {"access_token": access_token, "token_type": "bearer"}
