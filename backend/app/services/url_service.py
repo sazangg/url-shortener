@@ -34,6 +34,7 @@ async def create_url(
             return new_url
         except IntegrityError:
             await session.rollback()
+            session.expunge(new_url)
             await asyncio.sleep(random.uniform(0, 0.05))
     raise RuntimeError(
         "Failed to create URL after multiple attempts due to IntegrityError."

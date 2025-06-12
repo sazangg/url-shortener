@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from pydantic import HttpUrl
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from ...core.config import settings
 from ...db.session import get_session
@@ -10,7 +11,7 @@ router = APIRouter(prefix="/urls", tags=["urls"])
 
 
 @router.post("/", response_model=UrlRead, status_code=status.HTTP_201_CREATED)
-async def shorten(payload: UrlCreate, session=Depends(get_session)):
+async def shorten(payload: UrlCreate, session: AsyncSession =Depends(get_session)):
     url = await create_url(
         session=session,
         original_url=str(payload.original_url),

@@ -2,13 +2,14 @@ from datetime import datetime
 from uuid import uuid4, UUID
 from sqlalchemy import func, Text, text
 from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.dialects.postgresql import UUID as PGUUID
 
 from ..db.base import Base
 
 class Url(Base):
     __tablename__ = "urls"
 
-    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True),primary_key=True, default=uuid4)
     slug: Mapped[str] = mapped_column(unique=True, nullable=False, index=True)
     original_url: Mapped[str] = mapped_column(nullable=False, type_=Text)
     created_at: Mapped[datetime] = mapped_column(server_default=func.now(), nullable=False)

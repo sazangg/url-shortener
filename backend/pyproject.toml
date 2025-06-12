@@ -9,6 +9,7 @@ dependencies = [
     "asyncpg>=0.30.0",
     "fastapi>=0.115.12",
     "fastapi-limiter>=0.1.6",
+    "load-dotenv>=0.1.0",
     "passlib[bcrypt]>=1.7.4",
     "psycopg>=3.2.9",
     "psycopg2-binary>=2.9.10",
