@@ -30,7 +30,6 @@ async def create_url(
         session.add(new_url)
         try:
             await session.flush()
-            await session.commit()
             return new_url
         except IntegrityError:
             await session.rollback()
