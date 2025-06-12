@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     JWT_SECRET: str = Field(default=..., alias="JWT_SECRET")
     JWT_ACCESS_EXP_MINUTES: int = Field(default=..., alias="JWT_ACCESS_EXP_MINUTES")
     JWT_REFRESH_EXP_DAYS: int = Field(default=..., alias="JWT_REFRESH_EXP_DAYS")
+    JWT_ENCODE_ALGORITHM: str = Field(default=..., alias="JWT_ENCODE_ALGORITHM")
     BASE_URL: str = Field(default=..., alias="BASE_URL")
 
     model_config = SettingsConfigDict(
