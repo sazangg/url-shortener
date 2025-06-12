@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
-from sqlalchemy import ForeignKey, Text, func, text
+from sqlalchemy import ForeignKey, Text, func, text, DateTime
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -26,10 +26,8 @@ class Url(Base):
     )
     slug: Mapped[str] = mapped_column(unique=True, nullable=False, index=True)
     original_url: Mapped[str] = mapped_column(nullable=False, type_=Text)
-    created_at: Mapped[datetime] = mapped_column(
-        server_default=func.now(), nullable=False
-    )
-    expires_at: Mapped[datetime] = mapped_column(nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
     clicks: Mapped[int] = mapped_column(
         default=0, server_default=text("0"), nullable=False
     )

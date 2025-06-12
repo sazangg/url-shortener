@@ -1,3 +1,4 @@
+from typing import cast
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import HttpUrl
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -20,7 +21,6 @@ async def shorten(
     url = await create_url(
         session=session,
         original_url=str(payload.original_url),
-        expires_at=payload.expires_at,
         user_id=current_user.id if current_user else None,
     )
 
@@ -31,8 +31,8 @@ async def shorten(
 
     return UrlRead(
         slug=url.slug,
-        short_url=HttpUrl(f"{settings.BASE_URL}/{url.slug}"),
-        original_url=HttpUrl(url.original_url),
+        short_url=cast(HttpUrl, f"{settings.BASE_URL}/{url.slug}"),
+        original_url=cast(HttpUrl, url.original_url),
         expires_at=url.expires_at,
         clicks=url.clicks,
     )

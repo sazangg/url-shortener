@@ -3,7 +3,6 @@ from pydantic import BaseModel, HttpUrl
 
 class UrlCreate(BaseModel):
     original_url: HttpUrl
-    expires_at: datetime | None = None
 
 class UrlRead(BaseModel):
     slug: str

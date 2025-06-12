@@ -20,8 +20,8 @@ async def get_session():
             await session.rollback()
             raise
 
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="v1/auth/login")
+strict_scheme = OAuth2PasswordBearer(tokenUrl="/v1/auth/login", auto_error=True)
+lenient_scheme = OAuth2PasswordBearer(tokenUrl="/v1/auth/login", auto_error=False)
 
 credentials_exc = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
@@ -35,8 +35,10 @@ async def _get_user(session: AsyncSession, user_id: UUID) -> User | None:
 
 
 async def get_current_user(
-    token: str = Depends(oauth2_scheme), session: AsyncSession = Depends(get_session)
+    token: str = Depends(strict_scheme),
+    session: AsyncSession = Depends(get_session),
 ) -> User:
+    
     user_id: Optional[str] = None
 
     try:
@@ -55,7 +57,7 @@ async def get_current_user(
 
 
 async def get_current_user_optional(
-    token: str | None = Depends(oauth2_scheme),
+    token: str | None = Depends(lenient_scheme),
     session: AsyncSession = Depends(get_session),
 ) -> User | None:
     if token is None:

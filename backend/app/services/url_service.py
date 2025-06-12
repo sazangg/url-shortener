@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..models import Url
 from ..core.utils import generate_random_slug
+from ..core.config import settings
 
 MAX_ATTEMPTS = 5
 
@@ -16,11 +17,12 @@ async def create_url(
     *,
     session: AsyncSession,
     original_url: str,
-    expires_at: datetime | None,
     user_id: UUID | None =None,
 ) -> Url | None:
-    if expires_at is None and user_id is None:
-        expires_at = datetime.now(timezone.utc) + timedelta(days=7)
+    expires_at: datetime | None = None
+    
+    if user_id is None:
+        expires_at = datetime.now(timezone.utc) + timedelta(days=settings.GUEST_URL_EXP_DAYS)
 
     for _ in range(MAX_ATTEMPTS):
         new_url = Url(
