@@ -17,11 +17,12 @@ export default function LoginPage() {
   const loginMutation = useLogin();
   const onSubmit = (data: FormData) => {
     toast.promise(
-      loginMutation
-        .mutateAsync(data)
-        .then(({ access_token }) => {auth.login(access_token); navigate("/")}),
+      loginMutation.mutateAsync(data).then(({ access_token }) => {
+        auth.login(access_token);
+        navigate("/");
+      }),
       {
-        loading: "Signing in…",
+        loading: "Signing in...",
         success: "Welcome back!",
         error: "Invalid credentials",
       }

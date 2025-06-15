@@ -1,7 +1,6 @@
 import type { UserRead } from "@/features/auth/model";
 import { useCallback, useLayoutEffect, useState } from "react";
-import { toast } from "react-hot-toast";
-import { api } from "../api";
+import { api, registerAuthHandlers } from "../api";
 import { AuthContext } from "./AuthContext";
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -19,7 +18,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useLayoutEffect(() => {
     if (!accessToken) {
-      if(!bootstrapped) setBootstrapped(true);
+      if (!bootstrapped) setBootstrapped(true);
       return;
     }
 
@@ -27,14 +26,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       .get<UserRead>("/v1/users/me")
       .then((response) => {
         setUser(response.data);
-
-        toast.success("Welcome back!");
       })
       .catch(() => {
         setAccessToken(null);
         setUser(null);
-
-        toast.error("Login failed, please try again");
       })
       .finally(() => setBootstrapped(true));
   }, [accessToken, bootstrapped]);
@@ -45,12 +40,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setAccessToken(token);
   }, []);
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    await api.post("/v1/auth/logout").catch(() => {});
+
     delete api.defaults.headers.common.Authorization;
     setAccessToken(null);
     setUser(null);
-    toast("Logged out successfully");
   }, []);
+
+  useLayoutEffect(() => {
+    registerAuthHandlers({
+      setToken: (token: string) => {
+        api.defaults.headers.common.Authorization = `Bearer ${token}`;
+        setAccessToken(token);
+      },
+      clearToken: () => logout(),
+    });
+  }, [logout]);
 
   return (
     <AuthContext value={{ user, accessToken, bootstrapped, login, logout }}>

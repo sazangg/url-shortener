@@ -4,9 +4,7 @@ import { Navigate } from "react-router";
 
 export function LoggedInGuard({ children }: { children: ReactNode }) {
   const { user, bootstrapped } = useAuth();
-
   if (!bootstrapped) return null;
-
   if (!user) {
     return <Navigate to="/auth/login" />;
   }
@@ -15,17 +13,21 @@ export function LoggedInGuard({ children }: { children: ReactNode }) {
 
 export function NotLoggedInGuard({ children }: { children: ReactNode }) {
   const { user, bootstrapped } = useAuth();
-
   if (!bootstrapped) return null;
-
   if (user) {
     return <Navigate to="/" />;
   }
   return children;
 }
 
-export const ShowIfLoggedIn = ({ children }: { children: React.ReactNode }) =>
-  useAuth().user ? <>{children}</> : null;
+export const ShowIfLoggedIn = ({ children }: { children: ReactNode }) => {
+  const { user, bootstrapped } = useAuth();
+  if (!bootstrapped) return null;
+  return user ? <>{children}</> : null;
+};
 
-export const ShowIfNotLoggedIn = ({ children }: { children: React.ReactNode }) =>
-  useAuth().user ? null : <>{children}</>;
+export const ShowIfNotLoggedIn = ({ children }: { children: ReactNode }) => {
+  const { user, bootstrapped } = useAuth();
+  if (!bootstrapped) return null;
+  return user ? null : <>{children}</>;
+};

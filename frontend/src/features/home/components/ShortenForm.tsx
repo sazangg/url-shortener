@@ -17,6 +17,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import type { UrlRead } from "../model";
+import { useShorten } from "../hooks/useShorten";
+import { Loader } from "lucide-react";
 
 const formSchema = z.object({
   url: z.string().url("You must enter a valid URL!"),
@@ -24,11 +27,11 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-export default function ShortenForm({
-  handler,
-}: {
-  handler: React.Dispatch<React.SetStateAction<boolean>>;
-}) {
+type Props = {
+  onDone: (short: UrlRead) => void;
+}
+
+export default function ShortenForm({ onDone }: Props) {
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -36,9 +39,12 @@ export default function ShortenForm({
     },
   });
 
+  const shortenMutation = useShorten();
+
   const onSubmit = async (values: FormData) => {
-    console.log(values);
-    handler(false);
+    const data = await shortenMutation.mutateAsync(values.url);
+    onDone(data);
+    form.reset();
   };
 
   return (
@@ -51,7 +57,10 @@ export default function ShortenForm({
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-2">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex flex-col gap-2"
+          >
             <div className="flex flex-row gap-2">
               <FormField
                 control={form.control}
@@ -64,7 +73,9 @@ export default function ShortenForm({
                   </FormItem>
                 )}
               />
-              <Button type="submit">Shorten</Button>
+              <Button type="submit" disabled={shortenMutation.isPending}>
+                {shortenMutation.isPending ? <Loader className="animate-spin" /> : "Shorten"}
+              </Button>
             </div>
 
             {form.formState.errors.url && (

@@ -1,21 +1,18 @@
 import { useState } from "react";
 import ShortenForm from "../components/ShortenForm";
-import { Button } from "@/components/ui/button";
+import type { UrlRead } from "../model";
+import ResultCard from "../components/ResultCard";
 
 export default function HomePage() {
-  const [isShorten, setIsShorten] = useState(true);
-
-  if (isShorten) {
-    return (
-      <div className="flex flex-col gap-4 justify-center items-center flex-1">
-        <ShortenForm handler={setIsShorten} />
-      </div>
-    );
-  }
+  const [result, setResult] = useState<UrlRead | null>(null);
 
   return (
     <div className="flex flex-col gap-4 justify-center items-center flex-1">
-      Result Card <Button onClick={() => setIsShorten(true)}>Shorten Another</Button>
+      {result ? (
+        <ResultCard url={result} onNew={() => setResult(null)} />
+      ) : (
+        <ShortenForm onDone={setResult} />
+      )}
     </div>
   );
 }

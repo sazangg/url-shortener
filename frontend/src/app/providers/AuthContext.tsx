@@ -6,7 +6,7 @@ export type AuthContextType = {
   accessToken: string | null;
   bootstrapped: boolean;
   login: (token: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
 };
 
 export const AuthContext = createContext<AuthContextType | null>(null)

@@ -20,6 +20,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Loader } from "lucide-react";
 
 const formSchema = z.object({
   email: z.string().email("You must enter a valid email!"),
@@ -98,8 +99,8 @@ export default function AuthForm({
         </Form>
       </CardContent>
       <CardFooter className="flex-col gap-2">
-        <Button form="auth-form" type="submit" className="w-full">
-          {isLoading ? "Loading..." : action}
+        <Button form="auth-form" type="submit" className="w-full" disabled={isLoading}>
+          {isLoading ? <Loader className="animate-spin"/> : action}
         </Button>
       </CardFooter>
     </Card>

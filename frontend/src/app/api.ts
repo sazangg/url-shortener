@@ -1,24 +1,38 @@
 import axios from "axios";
 
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_BACKEND_API_URL as string ?? "/api/v1",
+  baseURL: import.meta.env.VITE_BACKEND_API_URL ?? "/api/v1",
   withCredentials: true,
 });
 
-api.interceptors.request.use(
-  (config) => {
-    // TODO : add auth header
-    return config;
-  },
-)
+let onLogin: ((token: string) => void) | null = null;
+let onLogout: (() => void) | null = null;
+
+export const registerAuthHandlers = (handlers: {
+  setToken: (token: string) => void;
+  clearToken: () => void;
+}) => {
+  onLogin = handlers.setToken;
+  onLogout = handlers.clearToken;
+}
 
 api.interceptors.response.use(
   (response) => response,
-  async (error) => {
-    if (error?.response?.status === 401) {
-      // TODO : attempt refresh token
-      // If we get back an access token, we set it in memory
+  async (err) => {
+    if (err?.response?.status !== 401 || err.config?.__isRetry) {
+      return Promise.reject(err);
     }
-    return Promise.reject(error);
+    try {
+      const { data } = await api.post("/v1/auth/refresh", null, {withCredentials: true});
+      const newToken = data.access_token;
+      if (onLogin) onLogin(newToken);
+
+      err.config.__isRetry = true;
+      err.config.headers.Authorization = `Bearer ${newToken}`;
+      return api(err.config);
+    } catch {
+      if (onLogout) onLogout();
+      return Promise.reject(err);
+    }
   }
 )
