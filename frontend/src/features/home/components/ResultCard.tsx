@@ -3,7 +3,6 @@ import type { UrlRead } from "../model";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Copy } from "lucide-react";
-import { Link } from "react-router";
 
 type Props = {
   url: UrlRead;
@@ -25,14 +24,14 @@ export default function ResultCard({ url, onNew }: Props) {
       </CardHeader>
       <CardContent className="flex justify-between">
         <div className="flex flex-col gap-2">
-          <Link
-            to={url.short_url}
+          <a
+            href={url.short_url}
             target="_blank"
             rel="noreferrer"
             className="text-primary text-2xl md:text-3xl font-bold hover:underline break-all transition-colors"
           >
             {url.short_url}
-          </Link>
+          </a>
           <div className="text-xs text-muted-foreground mt-1 break-all">
             Original: <span className="font-medium">{url.original_url}</span>
           </div>
