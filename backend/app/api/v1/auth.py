@@ -16,7 +16,7 @@ from ...core.security import (
 )
 from ...core.config import settings
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+router = APIRouter(prefix="/auth", tags=["Auth"])
 
 def set_refresh_cookie(response: Response, refresh_token: str):
     response.set_cookie(
@@ -90,3 +90,14 @@ async def refresh_token(request: Request, response: Response):
     set_refresh_cookie(response, refresh_token)
 
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+@router.post("/logout")
+async def logout_user(response: Response):
+    response.delete_cookie(
+        "refresh_token",
+        path="/auth/refresh",
+        httponly=True,
+        samesite="strict",
+    )
+    return {"detail": "ok"}

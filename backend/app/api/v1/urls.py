@@ -9,7 +9,7 @@ from ...models import User
 from ...schemas import UrlCreate, UrlRead
 from ...services.url_service import create_url
 
-router = APIRouter(prefix="/urls", tags=["urls"])
+router = APIRouter(prefix="/urls", tags=["Urls"])
 
 
 @router.post("/", response_model=UrlRead, status_code=status.HTTP_201_CREATED)

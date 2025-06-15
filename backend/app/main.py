@@ -2,14 +2,15 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 
 from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from sqlalchemy import select, text, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from .api.deps import get_session
 from .api.v1 import router_api_v1
 from .db.session import engine
 from .models import Url
-from .api.deps import get_session
 
 
 @asynccontextmanager
@@ -23,10 +24,17 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan, title="URL Shortener MVP")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 app.include_router(router_api_v1)
 
 
-@app.get("/{slug}")
+@app.get("/{slug}", status_code=status.HTTP_307_TEMPORARY_REDIRECT)
 async def redirect(slug: str, session: AsyncSession = Depends(get_session)):
     stmt = select(Url).where(Url.slug == slug)
     result = await session.execute(stmt)
